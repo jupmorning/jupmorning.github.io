@@ -237,7 +237,7 @@
   document.addEventListener('keydown', (e) => {
     buffer += e.key.toLowerCase();
     if (buffer.includes('jm')) {
-      window.location.href = '/backroom.html';
+      window.location.href = './backroom.html';
     }
     if (buffer.length > 10) buffer = buffer.slice(-10);
   });
