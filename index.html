@@ -231,5 +231,16 @@
     }
   });
 </script>
+<script>
+  // Redirect to /backroom.html when typing 'jm'
+  let buffer = '';
+  document.addEventListener('keydown', (e) => {
+    buffer += e.key.toLowerCase();
+    if (buffer.includes('jm')) {
+      window.location.href = '/backroom.html';
+    }
+    if (buffer.length > 10) buffer = buffer.slice(-10);
+  });
+</script>
 </body>
 </html>
