@@ -7,10 +7,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
   <!-- Social Sharing Metadata -->
-  <meta property="og:title" content="Jup Morning" />
-  <meta property="og:description" content="Retro sunrise over Jupiter. Watch the rise of JM." />
-  <meta property="og:image" content="https://example.com/preview.png" />
-  <meta property="og:url" content="https://example.com" />
+  <meta property="og:title" content="Jup Morning - JM" />
+  <meta property="og:description" content="Sunrise over Jupiter. Watch the rise of JM." />
+  <meta property="og:image" content="https://www.jupmorning.com/preview.png" />
+  <meta property="og:url" content="https://www.jupmorning.com" />
   <meta name="twitter:card" content="summary_large_image" />
 
   <style>
@@ -118,6 +118,7 @@
       color: #ffffff;
       z-index: 3;
       top: 48%;
+      word-break: break-word;
     }
 
     #copyBtnWrapper {
@@ -150,7 +151,8 @@
       z-index: 5;
       box-shadow: 3px 3px #060;
     }
-      .share-button {
+
+    .share-button {
       position: absolute;
       bottom: 20px;
       right: 20px;
@@ -170,7 +172,7 @@
       transform: scale(1.1);
       background: #222;
     }
-</style>
+  </style>
 </head>
 <body>
   <div id="loading">
@@ -215,32 +217,44 @@
         }, 1500);
       });
     }
+
     document.getElementById('shareBtn').addEventListener('click', async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Jup Morning 🌅🪐',
-          text: 'Check out this 8-bit sunrise over Jupiter!',
-          url: window.location.href
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'Jup Morning 🌅🪐',
+            text: 'Check out this 8-bit sunrise over Jupiter!',
+            url: window.location.href
+          });
+        } catch (err) {
+          console.error('Share cancelled or failed:', err);
+        }
+      } else {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+          alert("Link copied to clipboard!");
         });
-      } catch (err) {
-        console.error('Share cancelled or failed:', err);
       }
-    } else {
-      alert("Your browser doesn't support sharing 🚀");
-    }
-  });
-</script>
-<script>
-  // Redirect to /backroom.html when typing 'jm'
-  let buffer = '';
-  document.addEventListener('keydown', (e) => {
-    buffer += e.key.toLowerCase();
-    if (buffer.includes('jm')) {
-      window.location.href = './backroom.html';
-    }
-    if (buffer.length > 10) buffer = buffer.slice(-10);
-  });
-</script>
+    });
+
+    // Easter egg trigger via keyboard
+    let buffer = '';
+    document.addEventListener('keydown', (e) => {
+      buffer += e.key.toLowerCase();
+      if (buffer.includes('jm')) {
+        window.location.href = '/backroom.html';
+      }
+      if (buffer.length > 10) buffer = buffer.slice(-10);
+    });
+
+    // Easter egg for mobile: tap 5 times anywhere
+    let tapCount = 0;
+    document.body.addEventListener('click', () => {
+      tapCount++;
+      if (tapCount === 5) {
+        window.location.href = '/backroom.html';
+      }
+      setTimeout(() => tapCount = 0, 3000); // reset after 3 seconds
+    });
+  </script>
 </body>
 </html>
