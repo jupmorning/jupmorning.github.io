@@ -119,26 +119,31 @@
          \/          \/     \/         \/          \/  
   </div>
   <div class="console" id="tweetBox">
-    <p>[no signals yet — initializing feed soon...]</p>
+    <p>[loading stored transmissions...]</p>
   </div>
   <div class="countdown" id="countdown">Next refresh in: 30s</div>
   <div class="footer">secret passage unlocked 🚀</div>
 
   <script>
+    const displayedLinks = new Set(JSON.parse(localStorage.getItem('jmStoredLinks')) || []);
+    const box = document.getElementById('tweetBox');
+
     async function fetchTweets() {
       try {
         const res = await fetch('https://rss.app/feeds/v1.1/mKPd8EwlJVYE031D.json');
         const data = await res.json();
 
-        const box = document.getElementById('tweetBox');
-        box.innerHTML = '';
-
         if (!data.items || data.items.length === 0) {
-          box.innerHTML = '<p>[no signals detected yet...]</p>';
+          const msg = document.createElement('p');
+          msg.textContent = '[no signals detected yet...]';
+          box.appendChild(msg);
           return;
         }
 
         for (const item of data.items.slice(0, 10)) {
+          if (displayedLinks.has(item.link)) continue;
+          displayedLinks.add(item.link);
+
           const post = document.createElement('div');
           post.className = 'post';
 
@@ -165,15 +170,19 @@
           post.innerHTML = title + link + bot;
           box.appendChild(post);
         }
+
+        localStorage.setItem('jmStoredLinks', JSON.stringify(Array.from(displayedLinks)));
       } catch (err) {
         console.error('Failed to load tweets:', err);
-        document.getElementById('tweetBox').innerHTML = '<p>[transmission error — try again later]</p>';
+        const errMsg = document.createElement('p');
+        errMsg.textContent = '[transmission error — try again later]';
+        box.appendChild(errMsg);
       }
     }
 
     fetchTweets();
 
-    let timeLeft = 3600;
+    let timeLeft = 30;
     const countdown = document.getElementById('countdown');
 
     setInterval(() => {
@@ -181,7 +190,7 @@
       countdown.textContent = `Next refresh in: ${timeLeft}s`;
       if (timeLeft <= 0) {
         fetchTweets();
-        timeLeft = 3600;
+        timeLeft = 30;
       }
     }, 1000);
   </script>
