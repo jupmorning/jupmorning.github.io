@@ -42,6 +42,7 @@ exports.handler = async () => {
     console.log('🆕 New items found:', newItems.length);
 
     for (const item of newItems) {
+      console.log('🔄 Processing item:', item.title);
       let commentary = '🛸 JM Bot is recalibrating...';
 
       try {
@@ -66,12 +67,16 @@ exports.handler = async () => {
         console.error('❌ OpenAI error for item:', item.title, aiError.message);
       }
 
-      existingData.unshift({
-        title: item.title,
-        link: item.link,
-        comment: commentary,
-        timestamp: new Date().toISOString()
-      });
+      try {
+        existingData.unshift({
+          title: item.title,
+          link: item.link,
+          comment: commentary,
+          timestamp: new Date().toISOString()
+        });
+      } catch (pushError) {
+        console.error('❌ Failed to push item to existingData:', pushError.message);
+      }
     }
 
     const contentToWrite = existingData.slice(0, 50);
