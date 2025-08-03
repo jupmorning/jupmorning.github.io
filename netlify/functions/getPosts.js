@@ -80,8 +80,17 @@ exports.handler = async () => {
     }
 
     const contentToWrite = existingData.slice(0, 50);
-    const jsonContent = JSON.stringify(contentToWrite, null, 2);
-    console.log('📦 Content to write:\n', jsonContent);
+    let jsonContent;
+    try {
+      jsonContent = JSON.stringify(contentToWrite, null, 2);
+      console.log('📦 Content to write:\n', jsonContent);
+    } catch (jsonError) {
+      console.error('❌ Failed to stringify contentToWrite:', jsonError.message);
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: 'Failed to encode JSON', detail: jsonError.message })
+      };
+    }
 
     try {
       console.log('🛰 Attempting to update GitHub file...');
