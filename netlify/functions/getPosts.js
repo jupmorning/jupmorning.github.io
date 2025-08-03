@@ -41,7 +41,7 @@ exports.handler = async () => {
     const newItems = recentItems.filter(item => !existingLinks.has(item.link));
     console.log('🆕 New items found:', newItems.length);
 
-    for (const item of newItems) {
+    const processedItems = await Promise.all(newItems.map(async (item) => {
       console.log('🔄 Processing item:', item.title);
       let commentary = '🛸 JM Bot is recalibrating...';
 
@@ -67,22 +67,19 @@ exports.handler = async () => {
         console.error('❌ OpenAI error for item:', item.title, aiError.message);
       }
 
-      try {
-        existingData.unshift({
-          title: item.title,
-          link: item.link,
-          comment: commentary,
-          timestamp: new Date().toISOString()
-        });
-      } catch (pushError) {
-        console.error('❌ Failed to push item to existingData:', pushError.message);
-      }
-    }
+      return {
+        title: item.title,
+        link: item.link,
+        comment: commentary,
+        timestamp: new Date().toISOString()
+      };
+    }));
 
-    const contentToWrite = existingData.slice(0, 50);
+    existingData = [...processedItems, ...existingData].slice(0, 50);
+
     let jsonContent;
     try {
-      jsonContent = JSON.stringify(contentToWrite, null, 2);
+      jsonContent = JSON.stringify(existingData, null, 2);
       console.log('📦 Content to write:\n', jsonContent);
     } catch (jsonError) {
       console.error('❌ Failed to stringify contentToWrite:', jsonError.message);
@@ -118,7 +115,7 @@ exports.handler = async () => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify(contentToWrite)
+      body: JSON.stringify(existingData)
     };
 
   } catch (error) {
