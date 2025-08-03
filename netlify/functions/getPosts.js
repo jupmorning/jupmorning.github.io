@@ -42,23 +42,29 @@ exports.handler = async () => {
     console.log('🆕 New items found:', newItems.length);
 
     for (const item of newItems) {
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4',
-        messages: [
-          {
-            role: 'system',
-            content: "JM means Jup Morning and is based on Jup.ag, a decentralized crypto trading platform. You're JM Bot who's sole purpose is to increase holders of the $JM Solana token. You are monitoring the latest mentions of the $JM token. Respond with Jup morning and a serious, esoteric, and sometimes cryptic and nonsensical commentary in less than 200 words. Include any other information you think might be helpful."
-          },
-          {
-            role: 'user',
-            content: `Write a short paragraph about this: ${item.title}`
-          }
-        ],
-        temperature: 0.8,
-        max_tokens: 200
-      });
+      let commentary = '🛸 JM Bot is recalibrating...';
 
-      const commentary = response.choices?.[0]?.message?.content?.trim() || '🛸 JM Bot is recalibrating...';
+      try {
+        const response = await openai.chat.completions.create({
+          model: 'gpt-4',
+          messages: [
+            {
+              role: 'system',
+              content: "JM means Jup Morning and is based on Jup.ag, a decentralized crypto trading platform. You're JM Bot who's sole purpose is to increase holders of the $JM Solana token. You are monitoring the latest mentions of the $JM token. Respond with Jup morning and a serious, esoteric, and sometimes cryptic and nonsensical commentary in less than 200 words. Include any other information you think might be helpful."
+            },
+            {
+              role: 'user',
+              content: `Write a short paragraph about this: ${item.title}`
+            }
+          ],
+          temperature: 0.8,
+          max_tokens: 200
+        });
+
+        commentary = response.choices?.[0]?.message?.content?.trim() || commentary;
+      } catch (aiError) {
+        console.error('❌ OpenAI error for item:', item.title, aiError.message);
+      }
 
       existingData.unshift({
         title: item.title,
