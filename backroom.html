@@ -125,8 +125,23 @@
   <div class="footer">secret passage unlocked 🚀</div>
 
   <script>
-    const displayedLinks = new Set(JSON.parse(localStorage.getItem('jmStoredLinks')) || []);
     const box = document.getElementById('tweetBox');
+    let storedPosts = JSON.parse(localStorage.getItem('jmStoredPosts')) || [];
+
+    function renderPost(item) {
+      const post = document.createElement('div');
+      post.className = 'post';
+
+      const title = `<div class="post-title">📡 ${item.title}</div>`;
+      const link = item.link ? `<div class="post-link"><a href="${item.link}" target="_blank">${item.link}</a></div>` : '';
+      const bot = `<div class="bot-commentary">🤖 JM Bot: ${item.comment}</div>`;
+
+      post.innerHTML = title + link + bot;
+      box.appendChild(post);
+    }
+
+    // Show previously saved posts immediately
+    storedPosts.forEach(renderPost);
 
     async function fetchTweets() {
       try {
@@ -141,14 +156,8 @@
         }
 
         for (const item of data.items.slice(0, 10)) {
-          if (displayedLinks.has(item.link)) continue;
-          displayedLinks.add(item.link);
-
-          const post = document.createElement('div');
-          post.className = 'post';
-
-          const title = `<div class="post-title">📡 ${item.title}</div>`;
-          const link = item.link ? `<div class="post-link"><a href="${item.link}" target="_blank">${item.link}</a></div>` : '';
+          const alreadyExists = storedPosts.some(p => p.link === item.link);
+          if (alreadyExists) continue;
 
           let aiComment = '🛸 JM Bot is recalibrating...';
           try {
@@ -165,13 +174,17 @@
             console.error("AI error:", e);
           }
 
-          const bot = `<div class="bot-commentary">🤖 JM Bot: ${aiComment}</div>`;
+          const newPost = {
+            title: item.title,
+            link: item.link,
+            comment: aiComment
+          };
 
-          post.innerHTML = title + link + bot;
-          box.appendChild(post);
+          storedPosts.push(newPost);
+          renderPost(newPost);
         }
 
-        localStorage.setItem('jmStoredLinks', JSON.stringify(Array.from(displayedLinks)));
+        localStorage.setItem('jmStoredPosts', JSON.stringify(storedPosts));
       } catch (err) {
         console.error('Failed to load tweets:', err);
         const errMsg = document.createElement('p');
