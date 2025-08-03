@@ -13,7 +13,7 @@ exports.handler = async () => {
   const [owner, repo] = process.env.GITHUB_REPO.split('/');
   const filePath = process.env.GITHUB_FILE_PATH;
 
-  console.log('📪 TESTING ENV VARS');
+  console.log('📬 TESTING ENV VARS');
   console.log('REPO:', process.env.GITHUB_REPO);
   console.log('FILE PATH:', filePath);
   console.log('RSS URL:', process.env.RSS_FEED_URL);
@@ -44,7 +44,7 @@ exports.handler = async () => {
 
     async function fetchTokenStats() {
       try {
-        const response = await fetch('https://public-api.birdeye.so/solana/price?address=AwLRmCaDTSy79TvyRmnT1d8ttiVD6GNTYFbymLXxjups', {
+        const response = await fetch('https://public-api.birdeye.so/public/token/price?address=AwLRmCaDTSy79TvyRmnT1d8ttiVD6GNTYFbymLXxjups', {
           headers: {
             'X-API-KEY': process.env.BIRDEYE_API_KEY
           }
@@ -58,18 +58,19 @@ exports.handler = async () => {
     }
 
     const tokenStats = await fetchTokenStats();
-    console.log('🐦 Birdeye tokenStats response:', tokenStats);
     const tokenMarketCap = Number(tokenStats?.marketCap || tokenStats?.mc || 0) || null;
+    const tokenValue = Number(tokenStats?.value || 0) || null;
 
     const processedItems = await Promise.all(newItems.map(async (item) => {
       console.log('🔄 Processing item:', item.title);
 
-      if (existingData.some(p => p.title === item.title)) {
+      const existing = existingData.find(p => p.title === item.title);
+      if (existing) {
         console.log('⏭ Skipping AI for existing title:', item.title);
-        return existingData.find(p => p.title === item.title);
+        return existing;
       }
 
-      let commentary = '🛸 JM Bot is recalibrating...';
+      let commentary = '🚘 JM Bot is recalibrating...';
       let image = `https://source.unsplash.com/400x200/?space,planet,crypto&t=${Date.now()}`;
 
       try {
@@ -100,7 +101,7 @@ exports.handler = async () => {
         comment: commentary,
         image,
         tokenStats: {
-          ...tokenStats,
+          value: tokenValue,
           marketCap: tokenMarketCap
         },
         timestamp: new Date().toISOString()
@@ -132,7 +133,7 @@ exports.handler = async () => {
         owner,
         repo,
         path: filePath,
-        message: 'Automated update: RSS + AI commentary',
+        message: 'Automated update: RSS + AI commentary + token stats',
         content: encoded,
         sha,
         branch: 'main'
