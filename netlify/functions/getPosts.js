@@ -85,12 +85,15 @@ exports.handler = async () => {
 
     try {
       console.log('🛰 Attempting to update GitHub file...');
+      const encoded = Buffer.from(jsonContent).toString('base64');
+      console.log('📄 Base64 encoded size:', encoded.length);
+
       const result = await octokit.repos.createOrUpdateFileContents({
         owner,
         repo,
         path: filePath,
         message: 'Automated update: RSS + AI commentary',
-        content: Buffer.from(jsonContent).toString('base64'),
+        content: encoded,
         sha,
         branch: 'main'
       });
