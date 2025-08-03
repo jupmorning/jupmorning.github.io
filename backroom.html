@@ -138,17 +138,6 @@
   </script>
 
   <script>
-    let buffer = '';
-    document.addEventListener('keydown', (e) => {
-      buffer += e.key.toLowerCase();
-      if (buffer.includes('jm')) {
-        window.location.href = '/backroom.html';
-      }
-      if (buffer.length > 10) buffer = buffer.slice(-10);
-    });
-  </script>
-
-  <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
@@ -157,6 +146,7 @@
     const gravity = 0.6;
     const jumpStrength = -8;
     let score = 0;
+    let started = false;
 
     const obstacles = [];
     function addObstacle() {
@@ -168,10 +158,13 @@
         height: height
       });
     }
-    setInterval(addObstacle, 1500);
 
     document.addEventListener("keydown", (e) => {
       if (e.key === " ") {
+        if (!started) {
+          started = true;
+          setInterval(addObstacle, 1000 + Math.random() * 1000);
+        }
         velocity = jumpStrength;
       }
     });
@@ -199,6 +192,14 @@
     function updateGame() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      if (!started) {
+        ctx.fillStyle = "#0ff";
+        ctx.font = "8px 'Press Start 2P'";
+        ctx.fillText("PRESS SPACE TO START", 25, canvas.height / 2);
+        requestAnimationFrame(updateGame);
+        return;
+      }
+
       velocity += gravity;
       meteorY += velocity;
 
@@ -221,6 +222,9 @@
           alert("Game Over! Final JM Score: " + score);
           score = 0;
           obstacles.length = 0;
+          started = false;
+          velocity = 0;
+          meteorY = 100;
           break;
         }
       }
