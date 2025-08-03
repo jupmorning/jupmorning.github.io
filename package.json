@@ -8,9 +8,8 @@
     "start": "netlify dev"
   },
   "dependencies": {
-    "node-fetch": "^2.6.11"
+    "node-fetch": "^2.7.0"
   },
-  "devDependencies": {},
   "keywords": [],
   "author": "",
   "license": "MIT"
