@@ -122,17 +122,18 @@
           div.style.marginBottom = '12px';
           const link = item.link ? `<br><a href="${item.link}" target="_blank">${item.link}</a>` : '';
 
-          let aiComment = '';
+          // Fetch AI commentary from Netlify function
+          let aiComment = '...';
           try {
-            const response = await fetch('/.netlify/functions/aiCommentary', {
+            const aiRes = await fetch('/.netlify/functions/aiCommentary', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ tweet: item.title })
+              body: JSON.stringify({ text: item.title })
             });
-            const json = await response.json();
-            aiComment = json.comment || '🤖 JM Bot is offline...';
+            const aiData = await aiRes.json();
+            aiComment = aiData.comment || aiComment;
           } catch (e) {
-            aiComment = '🤖 JM Bot failed to respond...';
+            aiComment = '🛸 JM Bot is recalibrating...';
           }
 
           div.innerHTML = `<strong>${item.title}</strong>${link}<br><em style="color:#0f0;">🤖 JM Bot:</em> ${aiComment}`;
@@ -146,7 +147,7 @@
 
     fetchTweets();
 
-    let timeLeft = 30;
+    let timeLeft = 3600;
     const countdown = document.getElementById('countdown');
 
     setInterval(() => {
@@ -154,7 +155,7 @@
       countdown.textContent = `Next refresh in: ${timeLeft}s`;
       if (timeLeft <= 0) {
         fetchTweets();
-        timeLeft = 30;
+        timeLeft = 3600;
       }
     }, 1000);
   </script>
