@@ -8,17 +8,17 @@
   <style>
     html, body {
       margin: 0;
-      padding: 0;
+      padding: 10px;
       background: black;
       color: #0ff;
       font-family: 'Press Start 2P', cursive;
+      min-height: 100vh;
+      overflow-x: hidden;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
       text-align: left;
-      overflow-x: hidden;
+      box-sizing: border-box;
     }
 
     h1 {
@@ -38,12 +38,13 @@
     .console {
       background: #111;
       border: 2px solid #0ff;
-      padding: 20px;
-      width: 100%;
+      padding: 15px;
+      width: 95%;
       max-width: 900px;
       box-shadow: 4px 4px #00f;
-      margin: 0 auto 30px;
-      overflow-y: auto;
+      margin: 10px auto 30px;
+      box-sizing: border-box;
+      overflow-wrap: break-word;
     }
 
     .post {
