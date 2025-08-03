@@ -79,6 +79,15 @@
       background: #000;
       border: 2px solid #0ff;
     }
+
+    .leaderboard {
+      margin-top: 20px;
+      background: #000;
+      border: 2px dashed #0ff;
+      padding: 10px;
+      font-size: 10px;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -91,6 +100,10 @@
     </div>
     <div class="countdown" id="countdown">Next refresh in: 30s</div>
     <canvas id="gameCanvas" width="300" height="150"></canvas>
+    <div class="leaderboard" id="leaderboard">
+      <strong>JM Leaderboard</strong><br/>
+      <ol id="leaderboardList"></ol>
+    </div>
   </div>
   <div class="footer">
     secret passage unlocked 🚀
@@ -138,7 +151,6 @@
   </script>
 
   <script>
-    // Easter egg: press "jm" on keyboard to re-enter the page
     let buffer = '';
     document.addEventListener('keydown', (e) => {
       buffer += e.key.toLowerCase();
@@ -150,7 +162,6 @@
   </script>
 
   <script>
-    // Simple retro game: Jumping meteor
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
@@ -158,7 +169,11 @@
     let velocity = 0;
     const gravity = 0.6;
     const jumpStrength = -8;
+    let score = 0;
     let isJumping = false;
+    let highScores = [];
+
+    const obstacles = [{ x: 300, y: 120, width: 10, height: 30 }];
 
     document.addEventListener("keydown", (e) => {
       if (e.key === " ") {
@@ -170,12 +185,40 @@
     function drawMeteor() {
       ctx.fillStyle = "#ff0";
       ctx.beginPath();
-      ctx.arc(150, meteorY, 10, 0, Math.PI * 2);
+      ctx.arc(50, meteorY, 10, 0, Math.PI * 2);
       ctx.fill();
+    }
+
+    function drawObstacles() {
+      ctx.fillStyle = "#f00";
+      obstacles.forEach(ob => {
+        ctx.fillRect(ob.x, ob.y, ob.width, ob.height);
+      });
+    }
+
+    function drawScore() {
+      ctx.fillStyle = "#0f0";
+      ctx.font = "10px 'Press Start 2P'";
+      ctx.fillText(`JM SCORE: ${score}`, 10, 15);
+    }
+
+    function updateLeaderboard(newScore) {
+      highScores.push(newScore);
+      highScores.sort((a, b) => b - a);
+      highScores = highScores.slice(0, 5);
+
+      const list = document.getElementById('leaderboardList');
+      list.innerHTML = '';
+      highScores.forEach((s, i) => {
+        const li = document.createElement('li');
+        li.textContent = `#${i + 1} - ${s}`;
+        list.appendChild(li);
+      });
     }
 
     function updateGame() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
       velocity += gravity;
       meteorY += velocity;
 
@@ -185,7 +228,28 @@
         isJumping = false;
       }
 
+      obstacles.forEach(ob => {
+        ob.x -= 2;
+        if (ob.x + ob.width < 0) {
+          ob.x = canvas.width + Math.random() * 100;
+          score++;
+        }
+
+        if (
+          50 < ob.x + ob.width &&
+          50 + 10 > ob.x &&
+          meteorY + 10 > ob.y
+        ) {
+          alert("Game Over! Final JM Score: " + score);
+          updateLeaderboard(score);
+          score = 0;
+          ob.x = canvas.width + 50;
+        }
+      });
+
       drawMeteor();
+      drawObstacles();
+      drawScore();
       requestAnimationFrame(updateGame);
     }
 
