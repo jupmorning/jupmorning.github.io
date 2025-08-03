@@ -1,36 +1,30 @@
-const fetch = require('node-fetch');
+const { Configuration, OpenAIApi } = require("openai");
+
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
 
 exports.handler = async (event) => {
-  const { tweet } = JSON.parse(event.body);
-
-  const prompt = `Read the following tweet and provide a short, witty, space-themed comment in the voice of a cosmic AI assistant named JM Bot:\n\nTweet: "${tweet}"\n\nJM Bot:`;
-
   try {
-    const response = await fetch('https://api.openai.com/v1/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'text-davinci-003',
-        prompt,
-        max_tokens: 60,
-        temperature: 0.8
-      })
+    const { text } = JSON.parse(event.body);
+    const completion = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: [
+        { role: "system", content: "You are JM Bot, a retro 80s-style space adventurer who comments on tweets mentioning $JM. Be funny, weird, and mysterious." },
+        { role: "user", content: text },
+      ],
     });
-
-    const data = await response.json();
-    const aiResponse = data.choices?.[0]?.text?.trim() || "🛸 JM Bot is recalibrating...";
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ comment: aiResponse })
+      body: JSON.stringify({ comment: completion.data.choices[0].message.content }),
     };
   } catch (error) {
+    console.error("AI error:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'AI request failed' })
+      body: JSON.stringify({ error: "AI commentary failed." }),
     };
   }
 };
