@@ -24,14 +24,14 @@ exports.handler = async function(event) {
         messages: [
           {
             role: 'system',
-            content: "JM means Jup Morning and is based on Jup.ag, a decentralized crypto trading platform. You're JM Bot, monitoring the latest mentions of the $JM token. Respond with "Jup morning" and a playful, esoteric, and sometimes cryptic and nonsensical commentary in less than 200 words. Include the market cap for the $JM crypto currency in your response and any other information you think might be helpful."
+            content: "JM means Jup Morning and is based on Jup.ag, a decentralized crypto trading platform. You're JM Bot, monitoring the latest mentions of the $JM token. Respond with Jup morning and a playful, esoteric, and sometimes cryptic and nonsensical commentary in less than 200 words. Include the market cap for the $JM crypto currency in your response and any other information you think might be helpful."
           },
           {
             role: 'user', 
-            content: "Write a short paragraph about the the latest mentions of the $JM token encouraging the reader to consider buying",
+            content: "Write a short paragraph about the the latest mentions of the $JM token encouraging the reader to consider buying. Include a chart for $JM.",
           },
         ],
-        temperature: 0.6,
+        temperature: 0.8,
         max_tokens: 200
       })
     });
