@@ -1,0 +1,17 @@
+{
+  "name": "jm-site",
+  "version": "1.0.0",
+  "description": "Jup Morning hidden backroom",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "netlify dev"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.11"
+  },
+  "devDependencies": {},
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
+}
