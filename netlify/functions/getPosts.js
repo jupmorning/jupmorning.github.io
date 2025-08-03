@@ -44,7 +44,7 @@ exports.handler = async () => {
 
     async function fetchTokenStats() {
       try {
-        const response = await fetch('https://public-api.birdeye.so/public/token/price?address=AwLRmCaDTSy79TvyRmnT1d8ttiVD6GNTYFbymLXxjups', {
+        const response = await fetch('https://public-api.birdeye.so/solana/price?address=AwLRmCaDTSy79TvyRmnT1d8ttiVD6GNTYFbymLXxjups', {
           headers: {
             'X-API-KEY': process.env.BIRDEYE_API_KEY
           }
