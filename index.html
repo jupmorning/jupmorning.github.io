@@ -218,6 +218,28 @@
         }, 1500);
       });
     }
+    async function loadTokenStats() {
+  try {
+    const res = await fetch('https://raw.githubusercontent.com/jupmorning/jm/main/posts.json');
+    const posts = await res.json();
+    const firstWithStats = posts.find(p => p.tokenStats?.marketCap);
+
+    if (firstWithStats && firstWithStats.tokenStats) {
+      const { marketCap, value } = firstWithStats.tokenStats;
+      const price = Number(value).toFixed(6);
+      const cap = Number(marketCap).toLocaleString(undefined, { maximumFractionDigits: 0 });
+      document.getElementById('tokenStats').textContent = `💰 $JM: $${price} — MC: $${cap}`;
+    } else {
+      document.getElementById('tokenStats').textContent = '⚠️ Token stats unavailable';
+    }
+  } catch (e) {
+    console.error('Token stats error:', e);
+    document.getElementById('tokenStats').textContent = '⚠️ Token stats unavailable';
+  }
+}
+
+loadTokenStats();
+
 
     document.getElementById('shareBtn').addEventListener('click', async () => {
       if (navigator.share) {
