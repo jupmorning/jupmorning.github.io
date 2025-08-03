@@ -225,7 +225,8 @@
   try {
     const res = await fetch('https://raw.githubusercontent.com/jupmorning/jm/main/posts.json');
     const posts = await res.json();
-    const firstWithStats = posts.find(p => p.tokenStats?.marketCap);
+    const firstWithStats = posts.find(p => p.tokenStats && (p.tokenStats.marketCap || p.tokenStats.value));
+
 
     if (firstWithStats && firstWithStats.tokenStats) {
       const { marketCap, value } = firstWithStats.tokenStats;
