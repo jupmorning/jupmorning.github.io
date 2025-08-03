@@ -12,6 +12,11 @@ exports.handler = async () => {
   const [owner, repo] = process.env.GITHUB_REPO.split('/');
   const filePath = process.env.GITHUB_FILE_PATH;
 
+  console.log('🧪 TESTING ENV VARS');
+  console.log('REPO:', process.env.GITHUB_REPO);
+  console.log('FILE PATH:', filePath);
+  console.log('RSS URL:', process.env.RSS_FEED_URL);
+
   try {
     const feed = await parser.parseURL(process.env.RSS_FEED_URL);
     const recentItems = feed.items.slice(0, 10);
@@ -23,14 +28,18 @@ exports.handler = async () => {
       const { data } = await octokit.repos.getContent({ owner, repo, path: filePath });
       existingData = JSON.parse(Buffer.from(data.content, 'base64').toString());
       sha = data.sha;
+      console.log('✅ Fetched existing posts. Count:', existingData.length);
     } catch (error) {
-      if (error.status !== 404) throw error;
+      if (error.status === 404) {
+        console.log('📄 File not found, will create new.');
+      } else {
+        throw error;
+      }
     }
 
     const existingLinks = new Set(existingData.map(p => p.link));
     const newItems = recentItems.filter(item => !existingLinks.has(item.link));
-
-    console.log('New items to add:', newItems.length);
+    console.log('🆕 New items found:', newItems.length);
 
     for (const item of newItems) {
       const response = await openai.chat.completions.create({
@@ -59,27 +68,38 @@ exports.handler = async () => {
       });
     }
 
-    existingData = existingData.slice(0, 50);
+    const contentToWrite = existingData.slice(0, 50);
+    const jsonContent = JSON.stringify(contentToWrite, null, 2);
+    console.log('📦 Content to write:\n', jsonContent);
 
-    const updateResponse = await octokit.repos.createOrUpdateFileContents({
-      owner,
-      repo,
-      path: filePath,
-      message: 'Automated update: RSS + AI commentary',
-      content: Buffer.from(JSON.stringify(existingData, null, 2)).toString('base64'),
-      sha,
-      branch: 'main'
-    });
+    try {
+      console.log('🛰 Attempting to update GitHub file...');
+      const result = await octokit.repos.createOrUpdateFileContents({
+        owner,
+        repo,
+        path: filePath,
+        message: 'Automated update: RSS + AI commentary',
+        content: Buffer.from(jsonContent).toString('base64'),
+        sha,
+        branch: 'main'
+      });
 
-    console.log('GitHub update response:', updateResponse.status);
+      console.log('✅ GitHub file updated:', result.status);
+    } catch (err) {
+      console.error('❌ GitHub file update failed:', err);
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: 'GitHub update failed', detail: err.message })
+      };
+    }
 
     return {
       statusCode: 200,
-      body: JSON.stringify(existingData)
+      body: JSON.stringify(contentToWrite)
     };
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error('🔥 General Error:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: error.message })
