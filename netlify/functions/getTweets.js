@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 exports.handler = async function(event, context) {
   const bearerToken = process.env.TWITTER_BEARER_TOKEN;
 
-  const searchQuery = encodeURIComponent(`"JM" OR "$JM" OR "#JM"`);
+  const searchQuery = encodeURIComponent(`"JUP Morning" OR "$JM" OR "#JM"`);
   const endpoint = `https://api.twitter.com/2/tweets/search/recent?query=${searchQuery}&max_results=10&tweet.fields=text,author_id&expansions=author_id&user.fields=username`;
 
   try {
