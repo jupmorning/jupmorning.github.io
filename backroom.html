@@ -126,7 +126,7 @@
 
   <script>
     const box = document.getElementById('tweetBox');
-    let storedPosts = JSON.parse(localStorage.getItem('jmStoredPosts')) || [];
+    let storedPosts = [];
 
     function renderPost(item) {
       const post = document.createElement('div');
@@ -140,56 +140,22 @@
       box.appendChild(post);
     }
 
-    // Show previously saved posts immediately
-    storedPosts.forEach(renderPost);
-
     async function fetchTweets() {
       try {
-        const res = await fetch('https://rss.app/feeds/v1.1/mKPd8EwlJVYE031D.json');
+        const res = await fetch('/.netlify/functions/getPosts');
         const data = await res.json();
 
-        if (!data.items || data.items.length === 0) {
-          const msg = document.createElement('p');
-          msg.textContent = '[no signals detected yet...]';
-          box.appendChild(msg);
+        if (!data || !Array.isArray(data) || data.length === 0) {
+          box.innerHTML = '<p>[no transmissions found]</p>';
           return;
         }
 
-        for (const item of data.items.slice(0, 10)) {
-          const alreadyExists = storedPosts.some(p => p.link === item.link);
-          if (alreadyExists) continue;
-
-          let aiComment = '🛸 JM Bot is recalibrating...';
-          try {
-            const aiRes = await fetch('/.netlify/functions/aiCommentary', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ text: `${item.title} ${item.description || ''}` })
-            });
-            const aiData = await aiRes.json();
-            if (aiData && aiData.comment) {
-              aiComment = aiData.comment;
-            }
-          } catch (e) {
-            console.error("AI error:", e);
-          }
-
-          const newPost = {
-            title: item.title,
-            link: item.link,
-            comment: aiComment
-          };
-
-          storedPosts.push(newPost);
-          renderPost(newPost);
-        }
-
-        localStorage.setItem('jmStoredPosts', JSON.stringify(storedPosts));
+        box.innerHTML = '';
+        storedPosts = data;
+        storedPosts.forEach(renderPost);
       } catch (err) {
-        console.error('Failed to load tweets:', err);
-        const errMsg = document.createElement('p');
-        errMsg.textContent = '[transmission error — try again later]';
-        box.appendChild(errMsg);
+        console.error('Failed to load shared posts:', err);
+        box.innerHTML = '<p>[transmission error — try again later]</p>';
       }
     }
 
