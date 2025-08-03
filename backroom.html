@@ -79,6 +79,12 @@
       background: #000;
       border: 2px solid #0ff;
     }
+
+    .game-over {
+      color: red;
+      font-size: 10px;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
@@ -91,6 +97,7 @@
     </div>
     <div class="countdown" id="countdown">Next refresh in: 30s</div>
     <canvas id="gameCanvas" width="300" height="150"></canvas>
+    <div id="gameOverMessage" class="game-over"></div>
   </div>
   <div class="footer">
     secret passage unlocked 🚀
@@ -147,8 +154,12 @@
     const jumpStrength = -8;
     let score = 0;
     let started = false;
+    let gameOver = false;
+    let gameOverMessage = document.getElementById("gameOverMessage");
 
     const obstacles = [];
+    const trail = [];
+
     function addObstacle() {
       const height = Math.random() * 40 + 10;
       obstacles.push({
@@ -159,14 +170,28 @@
       });
     }
 
+    function startGame() {
+      started = true;
+      gameOver = false;
+      gameOverMessage.textContent = "";
+      score = 0;
+      obstacles.length = 0;
+      meteorY = 100;
+      velocity = 0;
+      trail.length = 0;
+      setInterval(addObstacle, 1000 + Math.random() * 1000);
+    }
+
     document.addEventListener("keydown", (e) => {
       if (e.key === " ") {
-        if (!started) {
-          started = true;
-          setInterval(addObstacle, 1000 + Math.random() * 1000);
-        }
+        if (!started || gameOver) startGame();
         velocity = jumpStrength;
       }
+    });
+
+    canvas.addEventListener("touchstart", () => {
+      if (!started || gameOver) startGame();
+      velocity = jumpStrength;
     });
 
     function drawMeteor() {
@@ -174,6 +199,16 @@
       ctx.beginPath();
       ctx.arc(50, meteorY, 10, 0, Math.PI * 2);
       ctx.fill();
+    }
+
+    function drawTrail() {
+      for (let i = 0; i < trail.length; i++) {
+        const t = trail[i];
+        ctx.fillStyle = `rgba(255,255,0,${1 - i / trail.length})`;
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
 
     function drawObstacles() {
@@ -195,7 +230,15 @@
       if (!started) {
         ctx.fillStyle = "#0ff";
         ctx.font = "8px 'Press Start 2P'";
-        ctx.fillText("PRESS SPACE TO START", 25, canvas.height / 2);
+        ctx.fillText("PRESS SPACE OR TAP TO START", 5, canvas.height / 2);
+        requestAnimationFrame(updateGame);
+        return;
+      }
+
+      if (gameOver) {
+        ctx.fillStyle = "red";
+        ctx.font = "10px 'Press Start 2P'";
+        ctx.fillText("GAME OVER", 80, canvas.height / 2);
         requestAnimationFrame(updateGame);
         return;
       }
@@ -219,16 +262,16 @@
         }
 
         if (50 < ob.x + ob.width && 60 > ob.x && meteorY + 10 > ob.y) {
-          alert("Game Over! Final JM Score: " + score);
-          score = 0;
-          obstacles.length = 0;
-          started = false;
-          velocity = 0;
-          meteorY = 100;
-          break;
+          gameOverMessage.textContent = `Game Over! Final JM Score: ${score}`;
+          gameOver = true;
+          return;
         }
       }
 
+      trail.push({ x: 50, y: meteorY });
+      if (trail.length > 10) trail.shift();
+
+      drawTrail();
       drawMeteor();
       drawObstacles();
       drawScore();
