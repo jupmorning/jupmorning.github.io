@@ -182,7 +182,9 @@
       trail.length = 0;
       clearInterval(obstacleInterval);
       obstacleInterval = setInterval(addObstacle, 1000 + Math.random() * 1000);
+      updateGame(); // <-- ensure animation loop resumes
     }
+
 
     document.addEventListener("keydown", (e) => {
       if (e.key === " ") {
