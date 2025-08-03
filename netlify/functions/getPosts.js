@@ -2,6 +2,7 @@
 const Parser = require('rss-parser');
 const { OpenAI } = require('openai');
 require('dotenv').config();
+const fetch = require('node-fetch');
 
 const parser = new Parser();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -12,7 +13,7 @@ exports.handler = async () => {
   const [owner, repo] = process.env.GITHUB_REPO.split('/');
   const filePath = process.env.GITHUB_FILE_PATH;
 
-  console.log('🧪 TESTING ENV VARS');
+  console.log('📪 TESTING ENV VARS');
   console.log('REPO:', process.env.GITHUB_REPO);
   console.log('FILE PATH:', filePath);
   console.log('RSS URL:', process.env.RSS_FEED_URL);
@@ -39,18 +40,36 @@ exports.handler = async () => {
 
     const existingLinks = new Set(existingData.map(p => p.link));
     const newItems = recentItems.filter(item => !existingLinks.has(item.link));
-    console.log('🆕 New items found:', newItems.length);
+    console.log('🕟 New items found:', newItems.length);
+
+    async function fetchTokenStats() {
+      try {
+        const response = await fetch('https://public-api.birdeye.so/public/token/price?address=AwLRmCaDTSy79TvyRmnT1d8ttiVD6GNTYFbymLXxjups', {
+          headers: {
+            'X-API-KEY': process.env.BIRDEYE_API_KEY
+          }
+        });
+        const result = await response.json();
+        return result?.data || {};
+      } catch (e) {
+        console.error('❌ Failed to fetch token stats:', e.message);
+        return {};
+      }
+    }
+
+    const tokenStats = await fetchTokenStats();
+    const tokenMarketCap = tokenStats?.marketCap || null;
 
     const processedItems = await Promise.all(newItems.map(async (item) => {
       console.log('🔄 Processing item:', item.title);
 
-      // Skip OpenAI if the title already exists
       if (existingData.some(p => p.title === item.title)) {
         console.log('⏭ Skipping AI for existing title:', item.title);
         return existingData.find(p => p.title === item.title);
       }
 
       let commentary = '🛸 JM Bot is recalibrating...';
+      let image = `https://source.unsplash.com/400x200/?space,planet,crypto&t=${Date.now()}`;
 
       try {
         const response = await openai.chat.completions.create({
@@ -78,6 +97,11 @@ exports.handler = async () => {
         title: item.title,
         link: item.link,
         comment: commentary,
+        image,
+        tokenStats: {
+          ...tokenStats,
+          marketCap: tokenMarketCap
+        },
         timestamp: new Date().toISOString()
       };
     }));
@@ -99,7 +123,7 @@ exports.handler = async () => {
     }
 
     try {
-      console.log('🛰 Attempting to update GitHub file...');
+      console.log('🚀 Attempting to update GitHub file...');
       const encoded = Buffer.from(jsonContent).toString('base64');
       console.log('📄 Base64 encoded size:', encoded.length);
 
