@@ -33,6 +33,7 @@
       width: 90%;
       max-width: 700px;
       box-shadow: 4px 4px #00f;
+      position: relative;
     }
 
     .tweet-box {
@@ -43,6 +44,8 @@
       color: #fff;
       font-size: 10px;
       text-align: left;
+      max-height: 300px;
+      overflow-y: auto;
     }
 
     .footer {
@@ -51,22 +54,84 @@
       font-size: 8px;
       color: #666;
     }
+
+    .glitch {
+      animation: glitch 1s infinite;
+    }
+
+    @keyframes glitch {
+      0% { text-shadow: 2px 0 red, -2px 0 cyan; }
+      20% { text-shadow: -2px 0 red, 2px 0 cyan; }
+      40% { text-shadow: 2px 0 red, -2px 0 cyan; }
+      60% { text-shadow: -1px 0 red, 1px 0 cyan; }
+      80% { text-shadow: 1px 0 red, -1px 0 cyan; }
+      100% { text-shadow: none; }
+    }
+
+    .countdown {
+      font-size: 8px;
+      margin-top: 10px;
+      color: #0f0;
+    }
   </style>
 </head>
 <body>
-  <h1>🪐 JM BACKROOM</h1>
+  <h1 class="glitch">🪐 JM BACKROOM</h1>
   <div class="console">
     <p>Welcome, traveler. You’ve found the hidden chamber.</p>
     <p>Listening for cosmic transmissions mentioning <strong>$JM</strong>...</p>
-    <div class="tweet-box">
+    <div class="tweet-box" id="tweetBox">
       [no signals yet — initializing feed soon...]
     </div>
+    <div class="countdown" id="countdown">Next refresh in: 30s</div>
   </div>
   <div class="footer">
     secret passage unlocked 🚀
   </div>
-<script>
-    // Redirect to /backroom.html when typing 'jm'
+
+  <script>
+    async function fetchTweets() {
+      try {
+        const res = await fetch('/.netlify/functions/getTweets');
+        const data = await res.json();
+
+        const box = document.getElementById('tweetBox');
+        box.innerHTML = '';
+
+        if (!data.tweets || data.tweets.length === 0) {
+          box.textContent = '[no signals detected yet...]';
+          return;
+        }
+
+        data.tweets.forEach(tweet => {
+          const div = document.createElement('div');
+          div.style.marginBottom = '12px';
+          div.textContent = `@${tweet.username}: ${tweet.text}`;
+          box.appendChild(div);
+        });
+      } catch (err) {
+        console.error('Failed to load tweets:', err);
+        document.getElementById('tweetBox').textContent = '[transmission error — try again later]';
+      }
+    }
+
+    fetchTweets();
+
+    let timeLeft = 30;
+    const countdown = document.getElementById('countdown');
+
+    setInterval(() => {
+      timeLeft--;
+      countdown.textContent = `Next refresh in: ${timeLeft}s`;
+      if (timeLeft <= 0) {
+        fetchTweets();
+        timeLeft = 30;
+      }
+    }, 1000);
+  </script>
+
+  <script>
+    // Easter egg: press "jm" on keyboard to re-enter the page
     let buffer = '';
     document.addEventListener('keydown', (e) => {
       buffer += e.key.toLowerCase();
