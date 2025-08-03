@@ -6,14 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Jup Morning</title>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-
-  <!-- Social Sharing Metadata -->
   <meta property="og:title" content="Jup Morning - JM" />
   <meta property="og:description" content="Sunrise over Jupiter. Watch the rise of JM." />
   <meta property="og:image" content="https://www.jupmorning.com/preview.png" />
   <meta property="og:url" content="https://www.jupmorning.com" />
   <meta name="twitter:card" content="summary_large_image" />
-
   <style>
     html, body {
       margin: 0;
@@ -24,7 +21,6 @@
       font-family: 'Press Start 2P', cursive;
       color: #fff;
     }
-
     #loading {
       position: absolute;
       width: 100%;
@@ -38,17 +34,14 @@
       font-size: 14px;
       text-align: center;
     }
-
     .blinker {
       animation: blink 1s infinite;
       margin-top: 10px;
       color: #0ff;
     }
-
     @keyframes blink {
       50% { opacity: 0; }
     }
-
     .stars {
       background: repeating-conic-gradient(#fff 0deg 1deg, transparent 1deg 360deg);
       background-size: 3px 3px;
@@ -59,12 +52,10 @@
       z-index: 0;
       animation: flicker 2s infinite;
     }
-
     @keyframes flicker {
       0%, 100% { opacity: 0.3; }
       50% { opacity: 0.6; }
     }
-
     .sun {
       position: absolute;
       bottom: -100px;
@@ -78,11 +69,9 @@
       z-index: 1;
       animation: rise 5s ease-out forwards;
     }
-
     @keyframes rise {
       to { bottom: 65%; }
     }
-
     .planet {
       position: absolute;
       bottom: 0;
@@ -94,7 +83,6 @@
       border-top-right-radius: 20px;
       z-index: 2;
     }
-
     .text, .jm {
       position: absolute;
       width: 100%;
@@ -104,13 +92,8 @@
       z-index: 3;
       top: 40%;
     }
-
-    .jm {
-      opacity: 1;
-    }
-
+    .jm { opacity: 1; }
     .hide { display: none; }
-
     #contract {
       position: absolute;
       width: 100%;
@@ -121,7 +104,6 @@
       top: 48%;
       word-break: break-word;
     }
-
     #copyBtnWrapper {
       position: absolute;
       width: 100%;
@@ -129,7 +111,6 @@
       top: 54%;
       z-index: 3;
     }
-
     #copyBtn {
       font-size: 8px;
       font-family: 'Press Start 2P';
@@ -139,7 +120,16 @@
       padding: 4px 8px;
       cursor: pointer;
     }
-
+    #tokenStats {
+      position: absolute;
+      width: 100%;
+      text-align: center;
+      top: 59%;
+      z-index: 3;
+      font-size: 10px;
+      color: #0ff;
+      font-family: 'Press Start 2P';
+    }
     #scoreboard {
       position: absolute;
       top: 10px;
@@ -152,7 +142,6 @@
       z-index: 5;
       box-shadow: 3px 3px #060;
     }
-
     .share-button {
       position: absolute;
       bottom: 20px;
@@ -168,7 +157,6 @@
       box-shadow: 4px 4px #00f, -2px -2px #0ff;
       transition: transform 0.1s ease;
     }
-
     .share-button:hover {
       transform: scale(1.1);
       background: #222;
@@ -176,36 +164,25 @@
   </style>
 </head>
 <body>
-  <div id="loading">
-    LOADING JUP SUNRISE...
-    <div class="blinker">▯</div>
-  </div>
+  <div id="loading">LOADING JUP SUNRISE...<div class="blinker">▯</div></div>
   <div class="stars"></div>
   <div class="sun"></div>
   <div class="planet"></div>
-
   <div id="text" class="text">JUP MORNING</div>
   <div id="jm" class="jm hide">JM</div>
-
   <div id="contract">CA: AwLRmCaDTSy79TvyRmnT1d8ttiVD6GNTYFbymLXxjups</div>
   <div id="copyBtnWrapper"><button id="copyBtn" onclick="copyContract()">COPY CA</button></div>
-  <div id="copyBtnWrapper"><button id="copyBtn" onclick="copyContract()">COPY CA</button></div>
-  <div id="tokenStats" style="position: absolute; width: 100%; text-align: center; top: 59%; font-size: 10px; z-index: 3; color: #0ff;"></div>
-
-
+  <div id="tokenStats">Fetching $JM stats...</div>
   <div id="scoreboard">VISITORS: <span id="score">000001</span></div>
   <button id="shareBtn" class="share-button">☄️ SHARE</button>
 
   <script>
     window.addEventListener("load", () => {
-      setTimeout(() => {
-        document.getElementById("loading").style.display = "none";
-      }, 2000);
+      setTimeout(() => document.getElementById("loading").style.display = "none", 2000);
       setTimeout(() => {
         document.getElementById("text").classList.add("hide");
         document.getElementById("jm").classList.remove("hide");
       }, 4000);
-
       const scoreEl = document.getElementById("score");
       let count = Math.floor(Math.random() * 9000) + 1000;
       scoreEl.textContent = String(count).padStart(6, '0');
@@ -216,34 +193,28 @@
       navigator.clipboard.writeText("AwLRmCaDTSy79TvyRmnT1d8ttiVD6GNTYFbymLXxjups").then(() => {
         const original = button.textContent;
         button.textContent = "COPIED!";
-        setTimeout(() => {
-          button.textContent = original;
-        }, 1500);
+        setTimeout(() => { button.textContent = original; }, 1500);
       });
     }
+
     async function loadTokenStats() {
-  try {
-    const res = await fetch('https://raw.githubusercontent.com/jupmorning/jm/main/posts.json');
-    const posts = await res.json();
-    const firstWithStats = posts.find(p => p.tokenStats && (p.tokenStats.marketCap || p.tokenStats.value));
-
-
-    if (firstWithStats && firstWithStats.tokenStats) {
-      const { marketCap, value } = firstWithStats.tokenStats;
-      const price = Number(value).toFixed(6);
-      const cap = Number(marketCap).toLocaleString(undefined, { maximumFractionDigits: 0 });
-      document.getElementById('tokenStats').textContent = `💰 $JM: $${price} — MC: $${cap}`;
-    } else {
-      document.getElementById('tokenStats').textContent = '⚠️ Token stats unavailable';
+      try {
+        const res = await fetch('https://raw.githubusercontent.com/jupmorning/jm/main/posts.json');
+        const posts = await res.json();
+        const firstWithStats = posts.find(p => p.tokenStats && !isNaN(Number(p.tokenStats.value)));
+        if (firstWithStats) {
+          const price = Number(firstWithStats.tokenStats.value).toFixed(6);
+          const cap = Number(firstWithStats.tokenStats.marketCap).toLocaleString(undefined, { maximumFractionDigits: 0 });
+          document.getElementById('tokenStats').textContent = `💰 $JM: $${price} — MC: $${cap}`;
+        } else {
+          document.getElementById('tokenStats').textContent = '⚠️ Token stats unavailable';
+        }
+      } catch (e) {
+        console.error('Token stats error:', e);
+        document.getElementById('tokenStats').textContent = '⚠️ Token stats unavailable';
+      }
     }
-  } catch (e) {
-    console.error('Token stats error:', e);
-    document.getElementById('tokenStats').textContent = '⚠️ Token stats unavailable';
-  }
-}
-
-loadTokenStats();
-
+    loadTokenStats();
 
     document.getElementById('shareBtn').addEventListener('click', async () => {
       if (navigator.share) {
@@ -263,24 +234,19 @@ loadTokenStats();
       }
     });
 
-    // Easter egg trigger via keyboard
+    // Easter egg triggers
     let buffer = '';
     document.addEventListener('keydown', (e) => {
       buffer += e.key.toLowerCase();
-      if (buffer.includes('jm')) {
-        window.location.href = '/backroom.html';
-      }
+      if (buffer.includes('jm')) window.location.href = '/backroom.html';
       if (buffer.length > 10) buffer = buffer.slice(-10);
     });
 
-    // Easter egg for mobile: tap 5 times anywhere
     let tapCount = 0;
     document.body.addEventListener('click', () => {
       tapCount++;
-      if (tapCount === 5) {
-        window.location.href = '/backroom.html';
-      }
-      setTimeout(() => tapCount = 0, 3000); // reset after 3 seconds
+      if (tapCount === 5) window.location.href = '/backroom.html';
+      setTimeout(() => tapCount = 0, 3000);
     });
   </script>
 </body>
