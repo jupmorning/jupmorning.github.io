@@ -29,7 +29,7 @@ exports.handler = async () => {
 
     const existingLinks = new Set(existingData.map(p => p.link));
     const newItems = recentItems.filter(item => !existingLinks.has(item.link));
-
+    console.log('New items to add:', newItems.length);
     for (const item of newItems) {
       const response = await openai.chat.completions.create({
         model: 'gpt-4',
