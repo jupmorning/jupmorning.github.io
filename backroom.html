@@ -73,6 +73,12 @@
       margin-top: 10px;
       color: #0f0;
     }
+
+    canvas {
+      margin-top: 30px;
+      background: #000;
+      border: 2px solid #0ff;
+    }
   </style>
 </head>
 <body>
@@ -84,6 +90,7 @@
       [no signals yet — initializing feed soon...]
     </div>
     <div class="countdown" id="countdown">Next refresh in: 30s</div>
+    <canvas id="gameCanvas" width="300" height="150"></canvas>
   </div>
   <div class="footer">
     secret passage unlocked 🚀
@@ -140,6 +147,49 @@
       }
       if (buffer.length > 10) buffer = buffer.slice(-10);
     });
+  </script>
+
+  <script>
+    // Simple retro game: Jumping meteor
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let meteorY = 100;
+    let velocity = 0;
+    const gravity = 0.6;
+    const jumpStrength = -8;
+    let isJumping = false;
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === " ") {
+        velocity = jumpStrength;
+        isJumping = true;
+      }
+    });
+
+    function drawMeteor() {
+      ctx.fillStyle = "#ff0";
+      ctx.beginPath();
+      ctx.arc(150, meteorY, 10, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function updateGame() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      velocity += gravity;
+      meteorY += velocity;
+
+      if (meteorY > 130) {
+        meteorY = 130;
+        velocity = 0;
+        isJumping = false;
+      }
+
+      drawMeteor();
+      requestAnimationFrame(updateGame);
+    }
+
+    updateGame();
   </script>
 </body>
 </html>
