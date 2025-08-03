@@ -8,9 +8,12 @@
     "start": "netlify dev"
   },
   "dependencies": {
+    "@octokit/rest": "^22.0.0",
+    "dotenv": "^17.2.1",
+    "fs": "0.0.1-security",
     "node-fetch": "^2.7.0",
-    "openai": "^4.0.0",
-    "fs": "0.0.1-security"
+    "openai": "^4.104.0",
+    "rss-parser": "^3.13.0"
   },
   "keywords": [],
   "author": "",
