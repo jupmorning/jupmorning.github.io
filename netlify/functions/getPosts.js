@@ -58,7 +58,8 @@ exports.handler = async () => {
     }
 
     const tokenStats = await fetchTokenStats();
-    const tokenMarketCap = tokenStats?.marketCap || null;
+    console.log('🐦 Birdeye tokenStats response:', tokenStats);
+    const tokenMarketCap = Number(tokenStats?.marketCap || tokenStats?.mc || 0) || null;
 
     const processedItems = await Promise.all(newItems.map(async (item) => {
       console.log('🔄 Processing item:', item.title);
