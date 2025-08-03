@@ -6,7 +6,7 @@
   <title>JM Backroom</title>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
-      html, body {
+    html, body {
       margin: 0;
       padding: 0;
       background: black;
@@ -20,7 +20,6 @@
       text-align: left;
       box-sizing: border-box;
     }
-
 
     h1 {
       font-size: 18px;
@@ -47,7 +46,6 @@
       box-sizing: border-box;
       overflow-wrap: break-word;
     }
-
 
     .post {
       margin-bottom: 30px;
@@ -121,59 +119,45 @@
          \/          \/     \/         \/          \/  
   </div>
   <div class="console" id="tweetBox">
-    <p>[no signals yet — initializing feed soon...]</p>
+    <p>[no signals yet — initializing feed...]</p>
   </div>
   <div class="countdown" id="countdown">Next refresh in: 30s</div>
   <div class="footer">secret passage unlocked 🚀</div>
 
   <script>
-    async function fetchTweets() {
+    async function fetchPosts() {
+      const box = document.getElementById('tweetBox');
+      box.innerHTML = '<p>[decoding backroom signals...]</p>';
+
       try {
-        const res = await fetch('https://rss.app/feeds/v1.1/mKPd8EwlJVYE031D.json');
-        const data = await res.json();
+        const res = await fetch('https://raw.githubusercontent.com/jupmorning/jm/main/posts.json');
+        const posts = await res.json();
 
-        const box = document.getElementById('tweetBox');
-        box.innerHTML = '';
-
-        if (!data.items || data.items.length === 0) {
-          box.innerHTML = '<p>[no signals detected yet...]</p>';
+        if (!posts || posts.length === 0) {
+          box.innerHTML = '<p>[no signals found in the archive]</p>';
           return;
         }
 
-        for (const item of data.items.slice(0, 10)) {
-          const post = document.createElement('div');
-          post.className = 'post';
+        box.innerHTML = '';
 
-          const title = `<div class="post-title">📡 ${item.title}</div>`;
-          const link = item.link ? `<div class="post-link"><a href="${item.link}" target="_blank">${item.link}</a></div>` : '';
+        for (const post of posts.slice(0, 10)) {
+          const postEl = document.createElement('div');
+          postEl.className = 'post';
 
-          let aiComment = '🛸 JM Bot is recalibrating...';
-          try {
-            const aiRes = await fetch('/.netlify/functions/aiCommentary', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ text: `${item.title} ${item.description || ''}` })
-            });
-            const aiData = await aiRes.json();
-            if (aiData && aiData.comment) {
-              aiComment = aiData.comment;
-            }
-          } catch (e) {
-            console.error("AI error:", e);
-          }
+          const title = `<div class="post-title">📡 ${post.title}</div>`;
+          const link = post.link ? `<div class="post-link"><a href="${post.link}" target="_blank">${post.link}</a></div>` : '';
+          const bot = `<div class="bot-commentary">🤖 JM Bot: ${post.comment}</div>`;
 
-          const bot = `<div class="bot-commentary">🤖 JM Bot: ${aiComment}</div>`;
-
-          post.innerHTML = title + link + bot;
-          box.appendChild(post);
+          postEl.innerHTML = title + link + bot;
+          box.appendChild(postEl);
         }
       } catch (err) {
-        console.error('Failed to load tweets:', err);
-        document.getElementById('tweetBox').innerHTML = '<p>[transmission error — try again later]</p>';
+        console.error('Failed to load posts.json:', err);
+        box.innerHTML = '<p>[transmission jammed — fallback initiated]</p>';
       }
     }
 
-    fetchTweets();
+    fetchPosts();
 
     let timeLeft = 3600;
     const countdown = document.getElementById('countdown');
@@ -182,7 +166,7 @@
       timeLeft--;
       countdown.textContent = `Next refresh in: ${timeLeft}s`;
       if (timeLeft <= 0) {
-        fetchTweets();
+        fetchPosts();
         timeLeft = 3600;
       }
     }, 1000);
