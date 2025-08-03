@@ -128,7 +128,7 @@
             const aiRes = await fetch('/.netlify/functions/aiCommentary', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ text: item.title })
+              body: JSON.stringify({ text: `${item.title} ${item.description || ''}` })
             });
             const aiData = await aiRes.json();
             if (aiData && aiData.comment) {
