@@ -1,16 +1,17 @@
 // 📁 netlify/functions/GetPosts.js
 const Parser = require('rss-parser');
 const { OpenAI } = require('openai');
-const { Octokit } = require('@octokit/rest');
 require('dotenv').config();
 
 const parser = new Parser();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-const [owner, repo] = process.env.GITHUB_REPO.split('/');
-const filePath = process.env.GITHUB_FILE_PATH;
 
 exports.handler = async () => {
+  const { Octokit } = await import('@octokit/rest');
+  const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+  const [owner, repo] = process.env.GITHUB_REPO.split('/');
+  const filePath = process.env.GITHUB_FILE_PATH;
+
   try {
     const feed = await parser.parseURL(process.env.RSS_FEED_URL);
     const recentItems = feed.items.slice(0, 10);
