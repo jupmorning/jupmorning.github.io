@@ -15,44 +15,69 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       min-height: 100vh;
-      text-align: center;
-      overflow: hidden;
+      text-align: left;
+      overflow-x: hidden;
     }
 
     h1 {
       font-size: 18px;
-      margin-bottom: 20px;
+      margin: 20px;
+      text-align: center;
+    }
+
+    .ascii-art {
+      white-space: pre;
+      color: #0f0;
+      font-size: 8px;
+      margin: 10px 0;
+      text-align: center;
     }
 
     .console {
       background: #111;
       border: 2px solid #0ff;
       padding: 20px;
-      width: 90%;
-      max-width: 700px;
+      width: 100%;
+      max-width: 900px;
       box-shadow: 4px 4px #00f;
-      position: relative;
-    }
-
-    .tweet-box {
-      margin-top: 20px;
-      padding: 10px;
-      background: #222;
-      border: 1px dashed #0ff;
-      color: #fff;
-      font-size: 10px;
-      text-align: left;
-      max-height: 300px;
+      margin: 0 auto 30px;
       overflow-y: auto;
     }
 
+    .post {
+      margin-bottom: 30px;
+      background: #000;
+      border: 1px solid #0ff;
+      padding: 15px;
+      animation: glitchFadeIn 1s ease-in-out;
+    }
+
+    .post-title {
+      color: #fff;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    .post-link {
+      font-size: 10px;
+      color: #0ff;
+    }
+
+    .bot-commentary {
+      margin-top: 10px;
+      background: #111;
+      border-left: 3px solid #0f0;
+      padding: 8px;
+      font-size: 10px;
+      color: #0f0;
+    }
+
     .footer {
-      position: absolute;
-      bottom: 10px;
       font-size: 8px;
       color: #666;
+      margin-bottom: 10px;
     }
 
     .glitch {
@@ -68,40 +93,35 @@
       100% { text-shadow: none; }
     }
 
+    @keyframes glitchFadeIn {
+      0% { opacity: 0; transform: translateY(-5px); }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
     .countdown {
       font-size: 8px;
-      margin-top: 10px;
+      margin: 10px 0;
       color: #0f0;
-    }
-
-    canvas {
-      margin-top: 30px;
-      background: #000;
-      border: 2px solid #0ff;
-    }
-
-    .game-over {
-      color: red;
-      font-size: 10px;
-      margin-top: 8px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
   <h1 class="glitch">🪐 JM BACKROOM</h1>
-  <div class="console">
-    <p>Welcome, traveler. You’ve found the hidden chamber.</p>
-    <p>Listening for cosmic transmissions mentioning <strong>$JM</strong>...</p>
-    <div class="tweet-box" id="tweetBox">
-      [no signals yet — initializing feed soon...]
-    </div>
-    <div class="countdown" id="countdown">Next refresh in: 30s</div>
-    <canvas id="gameCanvas" width="300" height="150"></canvas>
-    <div id="gameOverMessage" class="game-over"></div>
+  <div class="ascii-art">
+    ___ ___     ___.           ________                
+   /   |   \ __\_ |__   ____  \_____  \___  __ ____   
+  /    ~    \|  || __ \_/ __ \  /  ____/\  \/ // __ \  
+  \    Y    /|  || \_\ \  ___/ /       \ \   /\  ___/  
+   \___|_  / |__||___  /\___  >\_______ \ \_/  \___  > 
+         \/          \/     \/         \/          \/  
   </div>
-  <div class="footer">
-    secret passage unlocked 🚀
+  <div class="console" id="tweetBox">
+    <p>[no signals yet — initializing feed soon...]</p>
   </div>
+  <div class="countdown" id="countdown">Next refresh in: 30s</div>
+  <div class="footer">secret passage unlocked 🚀</div>
 
   <script>
     async function fetchTweets() {
@@ -113,16 +133,17 @@
         box.innerHTML = '';
 
         if (!data.items || data.items.length === 0) {
-          box.textContent = '[no signals detected yet...]';
+          box.innerHTML = '<p>[no signals detected yet...]</p>';
           return;
         }
 
         for (const item of data.items.slice(0, 10)) {
-          const div = document.createElement('div');
-          div.style.marginBottom = '12px';
-          const link = item.link ? `<br><a href="${item.link}" target="_blank">${item.link}</a>` : '';
+          const post = document.createElement('div');
+          post.className = 'post';
 
-          // Fetch AI commentary from Netlify function
+          const title = `<div class="post-title">📡 ${item.title}</div>`;
+          const link = item.link ? `<div class="post-link"><a href="${item.link}" target="_blank">${item.link}</a></div>` : '';
+
           let aiComment = '🛸 JM Bot is recalibrating...';
           try {
             const aiRes = await fetch('/.netlify/functions/aiCommentary', {
@@ -138,12 +159,14 @@
             console.error("AI error:", e);
           }
 
-          div.innerHTML = `<strong>${item.title}</strong>${link}<br><em style="color:#0f0;">🤖 JM Bot:</em> ${aiComment}`;
-          box.appendChild(div);
+          const bot = `<div class="bot-commentary">🤖 JM Bot: ${aiComment}</div>`;
+
+          post.innerHTML = title + link + bot;
+          box.appendChild(post);
         }
       } catch (err) {
         console.error('Failed to load tweets:', err);
-        document.getElementById('tweetBox').textContent = '[transmission error — try again later]';
+        document.getElementById('tweetBox').innerHTML = '<p>[transmission error — try again later]</p>';
       }
     }
 
@@ -160,10 +183,6 @@
         timeLeft = 3600;
       }
     }, 1000);
-  </script>
-
-  <script>
-    // [Game logic code continues here]
   </script>
 </body>
 </html>
