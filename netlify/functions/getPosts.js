@@ -29,7 +29,9 @@ exports.handler = async () => {
 
     const existingLinks = new Set(existingData.map(p => p.link));
     const newItems = recentItems.filter(item => !existingLinks.has(item.link));
+
     console.log('New items to add:', newItems.length);
+
     for (const item of newItems) {
       const response = await openai.chat.completions.create({
         model: 'gpt-4',
@@ -59,14 +61,17 @@ exports.handler = async () => {
 
     existingData = existingData.slice(0, 50);
 
-    await octokit.repos.createOrUpdateFileContents({
+    const updateResponse = await octokit.repos.createOrUpdateFileContents({
       owner,
       repo,
       path: filePath,
       message: 'Automated update: RSS + AI commentary',
       content: Buffer.from(JSON.stringify(existingData, null, 2)).toString('base64'),
-      sha
+      sha,
+      branch: 'main'
     });
+
+    console.log('GitHub update response:', updateResponse.status);
 
     return {
       statusCode: 200,
