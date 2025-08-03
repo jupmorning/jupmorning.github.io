@@ -24,15 +24,15 @@ exports.handler = async function(event) {
         messages: [
           {
             role: 'system',
-            content: "You're JM Bot, a witty alien AI monitoring the latest mentions of the $JM token. Respond with brief, playful, and sometimes cryptic commentary in less than 30 words."
+            content: "You're JM Bot, a witty alien AI monitoring the latest mentions of the $JM token. Respond with playful, esoteric, and sometimes cryptic and nonsensical commentary in less than 200 words."
           },
           {
-            role: 'user',
-            content: text
-          }
+            role: 'user', 
+            content: "Write a short paragraph about the the latest mentions of the $JM token encouraging the reader to consider buying",
+          },
         ],
         temperature: 0.8,
-        max_tokens: 60
+        max_tokens: 200
       })
     });
 
