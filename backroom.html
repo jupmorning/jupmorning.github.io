@@ -123,7 +123,7 @@
           const link = item.link ? `<br><a href="${item.link}" target="_blank">${item.link}</a>` : '';
 
           // Fetch AI commentary from Netlify function
-          let aiComment = '...';
+          let aiComment = '🛸 JM Bot is recalibrating...';
           try {
             const aiRes = await fetch('/.netlify/functions/aiCommentary', {
               method: 'POST',
@@ -131,9 +131,11 @@
               body: JSON.stringify({ text: item.title })
             });
             const aiData = await aiRes.json();
-            aiComment = aiData.comment || aiComment;
+            if (aiData && aiData.comment) {
+              aiComment = aiData.comment;
+            }
           } catch (e) {
-            aiComment = '🛸 JM Bot is recalibrating...';
+            console.error("AI error:", e);
           }
 
           div.innerHTML = `<strong>${item.title}</strong>${link}<br><em style="color:#0f0;">🤖 JM Bot:</em> ${aiComment}`;
