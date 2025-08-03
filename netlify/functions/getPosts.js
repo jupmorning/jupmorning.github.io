@@ -1,3 +1,4 @@
+// netlify/functions/getPosts.js
 const fs = require('fs');
 const path = require('path');
 
@@ -11,8 +12,8 @@ exports.handler = async function () {
         statusCode: 200,
         body: data,
         headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/json"
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json'
         }
       };
     } else {
@@ -20,8 +21,8 @@ exports.handler = async function () {
         statusCode: 200,
         body: JSON.stringify([]),
         headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/json"
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json'
         }
       };
     }
