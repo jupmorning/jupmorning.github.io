@@ -12,15 +12,13 @@
       background: black;
       color: #0ff;
       font-family: 'Press Start 2P', cursive;
-      width: 100vw;
-      height: 100vh;
-      overflow-x: hidden;
-      overflow-y: auto;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
+      min-height: 100vh;
       text-align: left;
+      overflow-x: hidden;
     }
 
     h1 {
@@ -45,6 +43,7 @@
       max-width: 900px;
       box-shadow: 4px 4px #00f;
       margin: 0 auto 30px;
+      overflow-y: auto;
     }
 
     .post {
@@ -111,57 +110,69 @@
 <body>
   <h1 class="glitch">🪐 JM BACKROOM</h1>
   <div class="ascii-art">
-    ___ ___     ___.           ________                <br/>
-   /   |   \ __\_ |__   ____  \_____  \___  __ ____   <br/>
-  /    ~    \|  || __ \_/ __ \  /  ____/\  \/ // __ \  <br/>
-  \    Y    /|  || \_\ \  ___/ /       \ \   /\  ___/  <br/>
-   \___|_  / |__||___  /\___  >\_______ \ \_/  \___  > <br/>
+    ___ ___     ___.           ________                
+   /   |   \ __\_ |__   ____  \_____  \___  __ ____   
+  /    ~    \|  || __ \_/ __ \  /  ____/\  \/ // __ \  
+  \    Y    /|  || \_\ \  ___/ /       \ \   /\  ___/  
+   \___|_  / |__||___  /\___  >\_______ \ \_/  \___  > 
          \/          \/     \/         \/          \/  
   </div>
   <div class="console" id="tweetBox">
-    <p>[loading stored transmissions...]</p>
+    <p>[no signals yet — initializing feed soon...]</p>
   </div>
   <div class="countdown" id="countdown">Next refresh in: 30s</div>
   <div class="footer">secret passage unlocked 🚀</div>
 
   <script>
-    const box = document.getElementById('tweetBox');
-    let storedPosts = [];
-
-    function renderPost(item) {
-      const post = document.createElement('div');
-      post.className = 'post';
-
-      const title = `<div class="post-title">📡 ${item.title}</div>`;
-      const link = item.link ? `<div class="post-link"><a href="${item.link}" target="_blank">${item.link}</a></div>` : '';
-      const bot = `<div class="bot-commentary">🤖 JM Bot: ${item.comment}</div>`;
-
-      post.innerHTML = title + link + bot;
-      box.appendChild(post);
-    }
-
     async function fetchTweets() {
       try {
-        const res = await fetch('/.netlify/functions/getPosts');
+        const res = await fetch('https://rss.app/feeds/v1.1/mKPd8EwlJVYE031D.json');
         const data = await res.json();
 
-        if (!data || !Array.isArray(data) || data.length === 0) {
-          box.innerHTML = '<p>[no transmissions found]</p>';
+        const box = document.getElementById('tweetBox');
+        box.innerHTML = '';
+
+        if (!data.items || data.items.length === 0) {
+          box.innerHTML = '<p>[no signals detected yet...]</p>';
           return;
         }
 
-        box.innerHTML = '';
-        storedPosts = data;
-        storedPosts.forEach(renderPost);
+        for (const item of data.items.slice(0, 10)) {
+          const post = document.createElement('div');
+          post.className = 'post';
+
+          const title = `<div class="post-title">📡 ${item.title}</div>`;
+          const link = item.link ? `<div class="post-link"><a href="${item.link}" target="_blank">${item.link}</a></div>` : '';
+
+          let aiComment = '🛸 JM Bot is recalibrating...';
+          try {
+            const aiRes = await fetch('/.netlify/functions/aiCommentary', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ text: `${item.title} ${item.description || ''}` })
+            });
+            const aiData = await aiRes.json();
+            if (aiData && aiData.comment) {
+              aiComment = aiData.comment;
+            }
+          } catch (e) {
+            console.error("AI error:", e);
+          }
+
+          const bot = `<div class="bot-commentary">🤖 JM Bot: ${aiComment}</div>`;
+
+          post.innerHTML = title + link + bot;
+          box.appendChild(post);
+        }
       } catch (err) {
-        console.error('Failed to load shared posts:', err);
-        box.innerHTML = '<p>[transmission error — try again later]</p>';
+        console.error('Failed to load tweets:', err);
+        document.getElementById('tweetBox').innerHTML = '<p>[transmission error — try again later]</p>';
       }
     }
 
     fetchTweets();
 
-    let timeLeft = 30;
+    let timeLeft = 3600;
     const countdown = document.getElementById('countdown');
 
     setInterval(() => {
@@ -169,7 +180,7 @@
       countdown.textContent = `Next refresh in: ${timeLeft}s`;
       if (timeLeft <= 0) {
         fetchTweets();
-        timeLeft = 30;
+        timeLeft = 3600;
       }
     }, 1000);
   </script>
