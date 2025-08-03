@@ -99,13 +99,6 @@
       50% { opacity: 0.5; }
       100% { opacity: 1; transform: translateY(0); }
     }
-
-    .countdown {
-      font-size: 8px;
-      margin: 10px 0;
-      color: #0f0;
-      text-align: center;
-    }
   </style>
 </head>
 <body>
@@ -121,7 +114,6 @@
   <div class="console" id="tweetBox">
     <p>[no signals yet — initializing feed...]</p>
   </div>
-  <div class="countdown" id="countdown">Next refresh in: 30s</div>
   <div class="footer">secret passage unlocked 🚀</div>
 
   <script>
@@ -158,18 +150,6 @@
     }
 
     fetchPosts();
-
-    let timeLeft = 3600;
-    const countdown = document.getElementById('countdown');
-
-    setInterval(() => {
-      timeLeft--;
-      countdown.textContent = `Next refresh in: ${timeLeft}s`;
-      if (timeLeft <= 0) {
-        fetchPosts();
-        timeLeft = 3600;
-      }
-    }, 1000);
   </script>
 </body>
 </html>
