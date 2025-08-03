@@ -1,3 +1,6 @@
+Here is your updated HTML code with the **cat element completely removed**, both from the HTML and the CSS:
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +9,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Jup Morning</title>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-
   <style>
     html, body {
       margin: 0;
@@ -136,22 +138,6 @@
       to { transform: rotate(15deg) scale(1.2); }
     }
 
-    .cat {
-      position: absolute;
-      bottom: 55px;
-      width: 32px;
-      height: 32px;
-      background-image: url('https://i.imgur.com/BnD60ao.gif'); /* Pixel walking cat */
-      background-size: cover;
-      animation: walk 15s linear infinite;
-      z-index: 5;
-    }
-
-    @keyframes walk {
-      0% { left: -40px; }
-      100% { left: 110%; }
-    }
-
     .text, .jm {
       position: absolute;
       width: 100%;
@@ -241,7 +227,6 @@
   <div class="planet">
     <div class="bands"></div>
     <div class="red-spot"></div>
-    <div class="cat"></div>
   </div>
 
   <div id="text" class="text">JUP MORNING</div>
@@ -319,3 +304,6 @@
   </script>
 </body>
 </html>
+```
+
+Let me know if you'd like to replace the cat with something else animated or interactive.
