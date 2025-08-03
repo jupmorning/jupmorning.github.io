@@ -159,6 +159,7 @@
 
     const obstacles = [];
     const trail = [];
+    let obstacleInterval;
 
     function addObstacle() {
       const height = Math.random() * 40 + 10;
@@ -179,18 +180,23 @@
       meteorY = 100;
       velocity = 0;
       trail.length = 0;
-      setInterval(addObstacle, 1000 + Math.random() * 1000);
+      clearInterval(obstacleInterval);
+      obstacleInterval = setInterval(addObstacle, 1000 + Math.random() * 1000);
     }
 
     document.addEventListener("keydown", (e) => {
       if (e.key === " ") {
-        if (!started || gameOver) startGame();
+        if (!started || gameOver) {
+          startGame();
+        }
         velocity = jumpStrength;
       }
     });
 
     canvas.addEventListener("touchstart", () => {
-      if (!started || gameOver) startGame();
+      if (!started || gameOver) {
+        startGame();
+      }
       velocity = jumpStrength;
     });
 
@@ -239,7 +245,6 @@
         ctx.fillStyle = "red";
         ctx.font = "10px 'Press Start 2P'";
         ctx.fillText("GAME OVER", 80, canvas.height / 2);
-        requestAnimationFrame(updateGame);
         return;
       }
 
