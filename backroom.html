@@ -79,15 +79,6 @@
       background: #000;
       border: 2px solid #0ff;
     }
-
-    .leaderboard {
-      margin-top: 20px;
-      background: #000;
-      border: 2px dashed #0ff;
-      padding: 10px;
-      font-size: 10px;
-      color: #fff;
-    }
   </style>
 </head>
 <body>
@@ -100,10 +91,6 @@
     </div>
     <div class="countdown" id="countdown">Next refresh in: 30s</div>
     <canvas id="gameCanvas" width="300" height="150"></canvas>
-    <div class="leaderboard" id="leaderboard">
-      <strong>JM Leaderboard</strong><br/>
-      <ol id="leaderboardList"></ol>
-    </div>
   </div>
   <div class="footer">
     secret passage unlocked 🚀
@@ -170,15 +157,22 @@
     const gravity = 0.6;
     const jumpStrength = -8;
     let score = 0;
-    let isJumping = false;
-    let highScores = [];
 
-    const obstacles = [{ x: 300, y: 120, width: 10, height: 30 }];
+    const obstacles = [];
+    function addObstacle() {
+      const height = Math.random() * 40 + 10;
+      obstacles.push({
+        x: canvas.width,
+        y: canvas.height - height,
+        width: 10,
+        height: height
+      });
+    }
+    setInterval(addObstacle, 1500);
 
     document.addEventListener("keydown", (e) => {
       if (e.key === " ") {
         velocity = jumpStrength;
-        isJumping = true;
       }
     });
 
@@ -202,50 +196,34 @@
       ctx.fillText(`JM SCORE: ${score}`, 10, 15);
     }
 
-    function updateLeaderboard(newScore) {
-      highScores.push(newScore);
-      highScores.sort((a, b) => b - a);
-      highScores = highScores.slice(0, 5);
-
-      const list = document.getElementById('leaderboardList');
-      list.innerHTML = '';
-      highScores.forEach((s, i) => {
-        const li = document.createElement('li');
-        li.textContent = `#${i + 1} - ${s}`;
-        list.appendChild(li);
-      });
-    }
-
     function updateGame() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       velocity += gravity;
       meteorY += velocity;
 
-      if (meteorY > 130) {
-        meteorY = 130;
+      if (meteorY > canvas.height - 10) {
+        meteorY = canvas.height - 10;
         velocity = 0;
-        isJumping = false;
       }
 
-      obstacles.forEach(ob => {
+      for (let i = obstacles.length - 1; i >= 0; i--) {
+        const ob = obstacles[i];
         ob.x -= 2;
+
         if (ob.x + ob.width < 0) {
-          ob.x = canvas.width + Math.random() * 100;
+          obstacles.splice(i, 1);
           score++;
+          continue;
         }
 
-        if (
-          50 < ob.x + ob.width &&
-          50 + 10 > ob.x &&
-          meteorY + 10 > ob.y
-        ) {
+        if (50 < ob.x + ob.width && 60 > ob.x && meteorY + 10 > ob.y) {
           alert("Game Over! Final JM Score: " + score);
-          updateLeaderboard(score);
           score = 0;
-          ob.x = canvas.width + 50;
+          obstacles.length = 0;
+          break;
         }
-      });
+      }
 
       drawMeteor();
       drawObstacles();
