@@ -92,21 +92,21 @@
   <script>
     async function fetchTweets() {
       try {
-        const res = await fetch('/.netlify/functions/getTweets');
+        const res = await fetch('https://rss.app/feeds/v1.1/mKPd8EwlJVYE031D.json');
         const data = await res.json();
 
         const box = document.getElementById('tweetBox');
         box.innerHTML = '';
 
-        if (!data.tweets || data.tweets.length === 0) {
+        if (!data.items || data.items.length === 0) {
           box.textContent = '[no signals detected yet...]';
           return;
         }
 
-        data.tweets.forEach(tweet => {
+        data.items.slice(0, 10).forEach(item => {
           const div = document.createElement('div');
           div.style.marginBottom = '12px';
-          div.textContent = `@${tweet.username}: ${tweet.text}`;
+          div.innerHTML = `<strong>${item.title}</strong><br><a href="${item.link}" target="_blank">${item.link}</a>`;
           box.appendChild(div);
         });
       } catch (err) {
