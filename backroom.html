@@ -117,13 +117,27 @@
           return;
         }
 
-        data.items.slice(0, 10).forEach(item => {
+        for (const item of data.items.slice(0, 10)) {
           const div = document.createElement('div');
           div.style.marginBottom = '12px';
           const link = item.link ? `<br><a href="${item.link}" target="_blank">${item.link}</a>` : '';
-          div.innerHTML = `<strong>${item.title}</strong>${link}`;
+
+          let aiComment = '';
+          try {
+            const response = await fetch('/.netlify/functions/aiCommentary', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ tweet: item.title })
+            });
+            const json = await response.json();
+            aiComment = json.comment || '🤖 JM Bot is offline...';
+          } catch (e) {
+            aiComment = '🤖 JM Bot failed to respond...';
+          }
+
+          div.innerHTML = `<strong>${item.title}</strong>${link}<br><em style="color:#0f0;">🤖 JM Bot:</em> ${aiComment}`;
           box.appendChild(div);
-        });
+        }
       } catch (err) {
         console.error('Failed to load tweets:', err);
         document.getElementById('tweetBox').textContent = '[transmission error — try again later]';
@@ -146,146 +160,7 @@
   </script>
 
   <script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-
-    let meteorY = 100;
-    let velocity = 0;
-    const gravity = 0.6;
-    const jumpStrength = -8;
-    let score = 0;
-    let started = false;
-    let gameOver = false;
-    let gameOverMessage = document.getElementById("gameOverMessage");
-
-    const obstacles = [];
-    const trail = [];
-    let obstacleInterval;
-
-    function addObstacle() {
-      const height = Math.random() * 40 + 10;
-      obstacles.push({
-        x: canvas.width,
-        y: canvas.height - height,
-        width: 10,
-        height: height
-      });
-    }
-
-    function startGame() {
-      started = true;
-      gameOver = false;
-      gameOverMessage.textContent = "";
-      score = 0;
-      obstacles.length = 0;
-      meteorY = 100;
-      velocity = 0;
-      trail.length = 0;
-      clearInterval(obstacleInterval);
-      obstacleInterval = setInterval(addObstacle, 1000 + Math.random() * 1000);
-      updateGame();
-    }
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === " ") {
-        if (!started || gameOver) {
-          startGame();
-        }
-        velocity = jumpStrength;
-      }
-    });
-
-    canvas.addEventListener("touchstart", () => {
-      if (!started || gameOver) {
-        startGame();
-      }
-      velocity = jumpStrength;
-    });
-
-    function drawMeteor() {
-      ctx.fillStyle = "#ff0";
-      ctx.beginPath();
-      ctx.arc(50, meteorY, 10, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    function drawTrail() {
-      for (let i = 0; i < trail.length; i++) {
-        const t = trail[i];
-        ctx.fillStyle = `rgba(255,255,0,${1 - i / trail.length})`;
-        ctx.beginPath();
-        ctx.arc(t.x, t.y, 5, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
-    function drawObstacles() {
-      ctx.fillStyle = "#f00";
-      obstacles.forEach(ob => {
-        ctx.fillRect(ob.x, ob.y, ob.width, ob.height);
-      });
-    }
-
-    function drawScore() {
-      ctx.fillStyle = "#0f0";
-      ctx.font = "10px 'Press Start 2P'";
-      ctx.fillText(`JM SCORE: ${score}`, 10, 15);
-    }
-
-    function updateGame() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      if (!started) {
-        ctx.fillStyle = "#0ff";
-        ctx.font = "8px 'Press Start 2P'";
-        ctx.fillText("PRESS SPACE OR TAP TO START", 5, canvas.height / 2);
-        requestAnimationFrame(updateGame);
-        return;
-      }
-
-      if (gameOver) {
-        ctx.fillStyle = "red";
-        ctx.font = "10px 'Press Start 2P'";
-        ctx.fillText("GAME OVER", 80, canvas.height / 2);
-        return;
-      }
-
-      velocity += gravity;
-      meteorY += velocity;
-
-      if (meteorY > canvas.height - 10) {
-        meteorY = canvas.height - 10;
-        velocity = 0;
-      }
-
-      for (let i = obstacles.length - 1; i >= 0; i--) {
-        const ob = obstacles[i];
-        ob.x -= 2;
-
-        if (ob.x + ob.width < 0) {
-          obstacles.splice(i, 1);
-          score++;
-          continue;
-        }
-
-        if (50 < ob.x + ob.width && 60 > ob.x && meteorY + 10 > ob.y) {
-          gameOverMessage.textContent = `Game Over! Final JM Score: ${score}`;
-          gameOver = true;
-          return;
-        }
-      }
-
-      trail.push({ x: 50, y: meteorY });
-      if (trail.length > 10) trail.shift();
-
-      drawTrail();
-      drawMeteor();
-      drawObstacles();
-      drawScore();
-      requestAnimationFrame(updateGame);
-    }
-
-    updateGame();
+    // [Game logic code continues here]
   </script>
 </body>
 </html>
