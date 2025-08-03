@@ -43,6 +43,13 @@ exports.handler = async () => {
 
     const processedItems = await Promise.all(newItems.map(async (item) => {
       console.log('🔄 Processing item:', item.title);
+
+      // Skip OpenAI if the title already exists
+      if (existingData.some(p => p.title === item.title)) {
+        console.log('⏭ Skipping AI for existing title:', item.title);
+        return existingData.find(p => p.title === item.title);
+      }
+
       let commentary = '🛸 JM Bot is recalibrating...';
 
       try {
@@ -75,6 +82,8 @@ exports.handler = async () => {
       };
     }));
 
+    console.log('✅ Processed items:', processedItems.length);
+
     existingData = [...processedItems, ...existingData].slice(0, 50);
 
     let jsonContent;
@@ -105,6 +114,7 @@ exports.handler = async () => {
       });
 
       console.log('✅ GitHub file updated:', result.status);
+      console.log('📄 Commit SHA:', result?.data?.commit?.sha);
     } catch (err) {
       console.error('❌ GitHub file update failed:', err);
       return {
@@ -113,6 +123,7 @@ exports.handler = async () => {
       };
     }
 
+    console.log('✅ Returning final data');
     return {
       statusCode: 200,
       body: JSON.stringify(existingData)
